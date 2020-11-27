@@ -1,10 +1,8 @@
 from flask import Flask, request
-# from flask_cors import CORS, cross_origin
 import integration.recipe_integration as recipes
+import integration.batch_integration as batches
 
 app = Flask(__name__)
-# cors - CORS(app)
-# app.config['CORS_HEADERS'] = 'Content-Type'
 
 @app.route('/robots.txt')
 def robots():
@@ -24,52 +22,106 @@ def hello():
     return 'Hello World!'
 
 @app.route('/v1/recipes')
-def getRecipes():
+def get_recipes():
     query = request.args.get('query', default='', type = str)
     page = request.args.get('query', default='0', type = int)
     size = request.args.get('query', default='10', type = int)
+    response = recipes.get_recipes(query, page, size)
     return app.response_class(
-        response = recipes.getRecipes(query, page, size),
-        status = 200,
-        mimetype = 'application/json'
+        response = response.text,
+        status = response.status_code,
+        mimetype = response.headers['Content-Type'],
     ) 
 
 @app.route('/v1/recipes/<recipe_id>')
-def getRecipe(recipe_id):
+def get_recipe(recipe_id):
+    response = recipes.get_recipe(recipe_id)
     return app.response_class(
-        response = recipes.getRecipe(recipe_id),
-        status = 200,
-        mimetype = 'application/json'
+        response = response.text,
+        status = response.status_code,
+        mimetype = response.headers['Content-Type'],
     ) 
 
 @app.route('/v1/recipes', methods=['POST'])
-def postRecipe():
+def post_recipe():
     recipe = request.data
-    print(recipe)
+    response = recipes.post_recipe(recipe)
     return app.response_class(
-        response = recipes.postRecipe(recipe),
-        status = 200,
-        mimetype = 'application/json'
+        response = response.text,
+        status = response.status_code,
+        mimetype = response.headers['Content-Type'],
     ) 
 
 @app.route('/v1/recipes/<recipe_id>', methods=['PUT'])
-def putRecipe(recipe_id):
+def put_recipe(recipe_id):
     recipe = request.data
+    response = recipes.put_recipe(recipe_id, recipe)
     return app.response_class(
-        response = recipes.putRecipe(recipe_id, recipe),
-        status = 200,
-        mimetype = 'application/json'
+        response = request.text,
+        status = response.status_code,
+        mimetype = response.headers['Content-Type'],
     ) 
 
 @app.route('/v1/recipes/<recipe_id>', methods=['DELETE'])
-def deleteRecipe(recipe_id):
+def delete_recipe(recipe_id):
+    response = recipes.delete_recipe(recipe_id)
     return app.response_class(
-        response = recipes.deleteRecipe(recipe_id),
+        response = response.text,
+        status = response.status_code,
+        mimetype = response.headers['Content-Type'],
+    ) 
+
+@app.route('/v1/recipes/<recipe_id>/batches')
+def get_batches_from_recipe(recipe_id):
+    query = request.args.get('query', default='', type = str)
+    page = request.args.get('query', default='0', type = int)
+    size = request.args.get('query', default='10', type = int)
+    response = recipes.get_batches_from_recipe(recipe_id, query, page, size)
+    return app.response_class(
+        response = response.text,
+        status = response.status_code,
+        mimetype = response.headers['Content-Type'],
+    ) 
+
+@app.route('/v1/batches/<batch_id>')
+def get_batch(batch_id):
+    response = batches.get_batch(batch_id)
+    return app.response_class(
+        response = response.text,
+        status = response.status_code,
+        mimetype = response.headers['Content-Type'],
+    ) 
+
+@app.route('/v1/batches', methods=['POST'])
+def post_batch():
+    batch = request.data
+    response = batches.post_batch(batch)
+    return app.response_class(
+        response = response.text,
         status = 200,
         mimetype = 'application/json'
     ) 
 
-@app.after_request # blueprint can also be app~~
+@app.route('/v1/batches/<batch_id>', methods=['PUT'])
+def put_batch(batch_id):
+    batch = request.data
+    response = batches.put_batch(batch_id, batch)
+    return app.response_class(
+        response = response.text,
+        status = response.status_code,
+        mimetype = response.headers['Content-Type'],
+    ) 
+
+@app.route('/v1/batches/<batch_id>', methods=['DELETE'])
+def delete_batch(batch_id):
+    response = batches.delete_batch(batch_id)
+    return app.response_class(
+        response = response.text,
+        status = response.status_code,
+        mimetype = response.headers['Content-Type'],
+    ) 
+
+@app.after_request
 def after_request(response):
     header = response.headers
     header['Access-Control-Allow-Origin'] = '*'
