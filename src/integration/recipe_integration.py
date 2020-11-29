@@ -1,6 +1,6 @@
 import requests
 
-SERVICE_URL = "http://localhost:8082/recipe-service/v1/recipes"
+SERVICE_URL = "http://tcc-recipe-service/recipe-service/v1/recipes"
 
 def get_recipes(query, page, size):
     response = requests.get(
